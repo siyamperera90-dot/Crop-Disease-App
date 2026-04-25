@@ -2,26 +2,16 @@ import streamlit as st
 import tensorflow as tf
 from PIL import Image
 import numpy as np
-import urllib.request
-import os
 
-# මෙතනට ඔයාගේ Release ලින්ක් එක දාන්න (උද්ධෘත ලකුණු ඇතුළේ)
-MODEL_URL = "https://github.com/siyamperera90-dot/Crop-Disease-App/releases/download/v1.0/crop_disease_model.2.h5"
-
+# Model එක Load කිරීම
 @st.cache_resource
 def load_model():
-    model_path = 'crop_disease_model.h5'
-    
-    # සර්වර් එකේ ෆයිල් එක නැත්නම් අර ලින්ක් එකෙන් බාගන්නවා
-    if not os.path.exists(model_path):
-        st.info("AI මොළය භාගත කරමින් පවතී... (මෙයට විනාඩියක් පමණ ගත විය හැක)")
-        urllib.request.urlretrieve(MODEL_URL, model_path)
-        
-    model = tf.keras.models.load_model(model_path)
+    model = tf.keras.models.load_model('crop_disease_model.h5')
     return model
 
 model = load_model()
 
+# හරියටම Dataset එකේ තියෙන ලෙඩ ජාති 15
 class_names = [
     'Pepper bell (මාළු මිරිස්) - Bacterial spot',
     'Pepper bell (මාළු මිරිස්) - Healthy (නිරෝගී)',
@@ -64,8 +54,5 @@ if uploaded_file is not None:
     confidence = np.max(predictions) * 100
     predicted_disease = class_names[predicted_class_index]
     
-    if confidence > 75.0:
-        st.success(f"**හඳුනාගත් රෝගය:** {predicted_disease}")
-        st.info(f"**නිවැරදි වීමේ සම්භාවිතාව:** {confidence:.2f}%")
-    else:
-        st.warning("⚠️ මට මේ ඡායාරූපය හරියටම හඳුනාගන්න අපහසුයි. කරුණාකර රෝගය සහිත පත්‍රයේ වඩාත් පැහැදිලි ඡායාරූපයක් ඇතුළත් කරන්න.")
+    st.success(f"**හඳුනාගත් රෝගය:** {predicted_disease}")
+    st.info(f"**නිවැරදි වීමේ සම්භාවිතාව (Confidence):** {confidence:.2f}%")
